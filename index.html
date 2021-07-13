@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumo Api</title>
+</head>
+<body style="background-color: rgb(212, 172, 149);">
+
+    <h3>Lista de games</h3>
+    <ul id="games">
+
+    </ul>
+    <hr>
+
+    <h3>Cadastrar game</h3>
+    <label>Nome: </label><br>
+    <input type="text" name="title" id="title"><br>
+    <label>Ano: </label><br>
+    <input type="number" name="date" id="date"><br>
+    <label>Price: </label><br>
+    <input type="number" name="price" id="price"><br><br>
+    <button id="cadastrar">Cadastrar</button>
+    <hr>
+
+    <h3>Editar game</h3>
+    <label>Nome: </label><br>
+    <input type="text" name="title" id="titleEdit"><br>
+    <label>Ano: </label><br>
+    <input type="number" name="date" id="dateEdit"><br>
+    <label>Price: </label><br>
+    <input type="number" name="price" id="priceEdit"><br><br>
+    <button id="editar">Editar</button>
+    <hr>
+
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+
+    axios.get("http://localhost/games").then((response) => {
+        var list = document.getElementById("games");
+        var games = response.data.games;
+
+        games.forEach(game => {
+            var item = document.createElement("li");
+            var editar = document.createElement("button");
+            var deletar = document.createElement("button");
+
+            editar.innerHTML = "Editar";
+            deletar.innerHTML = "Deletar";
+
+            editar.addEventListener("click", ()=>{
+                editGame(item);
+            })
+
+            deletar.addEventListener("click", ()=>{
+                deleteGame(item);
+            })
+
+            item.innerText = game.title + " - " + game.date + " - $" + game.price + " ";
+            item.setAttribute("data-id", game.id);
+            item.setAttribute("data-title", game.title);
+            item.setAttribute("data-date", game.date);
+            item.setAttribute("data-price", game.price);
+            item.append(editar);
+            item.append(deletar);
+
+            list.append(item);
+        });
+    }).catch(err => {
+        var list = getElementById("games");
+        list.innerText = err;
+    })
+
+    var cadastrar = document.getElementById("cadastrar");
+    cadastrar.addEventListener("click",()=>{
+
+        var title = document.getElementById("title").value;
+        var date = document.getElementById("date").value;
+        var price = document.getElementById("price").value;
+
+        var game = {
+            title,
+            date,
+            price
+        }
+
+        axios.post("http://localhost/game",game).then(()=>{
+            document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
+        }).catch((err)=>{
+            alert(err);
+        })
+    })
+
+    function editGame(item) {
+        var title = item.getAttribute("data-title");
+        var date = item.getAttribute("data-date");
+        var price = item.getAttribute("data-price");
+        var id = item.getAttribute("data-id");
+
+        document.getElementById("titleEdit").value = title;
+        document.getElementById("dateEdit").value = date;
+        document.getElementById("priceEdit").value = price;
+        document.getElementById("editar").setAttribute("data-id", id);
+      
+    }
+
+    function deleteGame(item){
+        var id = item.getAttribute("data-id");
+
+        axios.delete("http://localhost/game/"+id).then(()=>{
+            document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
+        }).catch((err)=>{
+            alert(err);
+        })     
+    }
+
+    var editar = document.getElementById("editar");
+    editar.addEventListener("click",(element)=>{
+
+        var id = element.srcElement.getAttribute("data-id");
+        var title = document.getElementById("titleEdit").value;
+        var date = document.getElementById("dateEdit").value;
+        var price = document.getElementById("priceEdit").value;
+
+        var game = {
+            title,
+            date,
+            price
+        }
+
+        axios.put("http://localhost/game/"+id,game).then(()=>{
+            document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
+        }).catch((err)=>{
+            alert(err);
+        })
+    })
+
+ 
+</script>
+</html>
