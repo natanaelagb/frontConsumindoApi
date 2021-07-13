@@ -8,10 +8,16 @@
 </head>
 <body style="background-color: rgb(212, 172, 149);">
 
-    <h3>Lista de games</h3>
-    <ul id="games">
+    <h2>Login</h2>
+    <label>Email: </label><br>
+    <input type="text" id="email"><br>
+    <label>Password: </label><br>
+    <input type="password" id="password"><br><br>
+    <button onclick="login()">Logar</button>
+    <hr>
 
-    </ul>
+    <h3>Lista de games</h3>
+    <ul id="games"></ul>
     <hr>
 
     <h3>Cadastrar game</h3>
@@ -38,8 +44,26 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+    var axiosConfig = {
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem("token")
+        }
+    };
 
-    axios.get("http://localhost/games").then((response) => {
+    function login() {
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+
+        axios.post("http://localhost/auth",{email, password}).then((res)=>{
+            localStorage.setItem("token", res.data.token);
+            axiosConfig.headers.Authorization = "Bearer " + localStorage.getItem("token");
+        }).catch((err)=>{
+            console.log(err);
+        })
+    }
+
+
+    axios.get("http://localhost/games",axiosConfig).then((response) => {
         var list = document.getElementById("games");
         var games = response.data.games;
 
@@ -70,7 +94,7 @@
             list.append(item);
         });
     }).catch(err => {
-        var list = getElementById("games");
+        var list = document.getElementById("games");
         list.innerText = err;
     })
 
@@ -87,7 +111,7 @@
             price
         }
 
-        axios.post("http://localhost/game",game).then(()=>{
+        axios.post("http://localhost/game", game, axiosConfig).then(()=>{
             document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
         }).catch((err)=>{
             alert(err);
@@ -110,7 +134,7 @@
     function deleteGame(item){
         var id = item.getAttribute("data-id");
 
-        axios.delete("http://localhost/game/"+id).then(()=>{
+        axios.delete("http://localhost/game/"+id, axiosConfig).then(()=>{
             document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
         }).catch((err)=>{
             alert(err);
@@ -131,7 +155,7 @@
             price
         }
 
-        axios.put("http://localhost/game/"+id,game).then(()=>{
+        axios.put("http://localhost/game/"+id, game, axiosConfig).then(()=>{
             document.location = "http://127.0.0.1:5500/CONSUMOAPIGAMES/index.html";
         }).catch((err)=>{
             alert(err);
